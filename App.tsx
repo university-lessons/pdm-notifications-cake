@@ -1,4 +1,5 @@
 import * as Notifications from "expo-notifications";
+import { Subscription } from "expo-modules-core";
 import React, { useState, useEffect, useRef } from "react";
 
 import {
@@ -7,6 +8,8 @@ import {
   TextInput,
   View,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 
 import AppLogo from "./src/components/AppLogo";
@@ -22,11 +25,12 @@ Notifications.setNotificationHandler({
 });
 
 export default function App() {
-  const [timerTrigger, setTimerTrigger] = useState("0");
+  const [timerTrigger, setTimerTrigger] = useState("1");
   const [expoPushToken, setExpoPushToken] = useState("");
-  const [notification, setNotification] = useState(false);
-  const notificationListener = useRef();
-  const responseListener = useRef();
+  const [notification, setNotification] =
+    useState<Notifications.Notification>(null);
+  const notificationListener = useRef<Subscription>();
+  const responseListener = useRef<Subscription>();
 
   useEffect(() => {
     NotificationHelper.registerForPushNotificationsAsync().then((token) =>
@@ -44,8 +48,10 @@ export default function App() {
       });
 
     return () => {
-      Notifications.removeNotificationSubscription(notificationListener);
-      Notifications.removeNotificationSubscription(responseListener);
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
+      );
+      Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, []);
 
@@ -58,7 +64,10 @@ export default function App() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <AppLogo />
 
       <Text>Quanto tempo o bolo ficará no forno (segundos)?</Text>
@@ -66,13 +75,13 @@ export default function App() {
         style={styles.orange}
         onChangeText={(text) => setTimerTrigger(text)}
         value={timerTrigger}
-        placeholder="5"
+        placeholder="1"
       />
 
       <TouchableOpacity style={styles.orange} onPress={handlePress}>
         <Text style={styles.buttonText}>Está no Forno!</Text>
       </TouchableOpacity>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 

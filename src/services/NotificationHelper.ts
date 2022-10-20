@@ -34,7 +34,7 @@ async function registerForPushNotificationsAsync() {
   return token;
 }
 
-async function send(title, body, timerTrigger) {
+async function send(title: string, body: string, timerTrigger: number) {
   await Notifications.scheduleNotificationAsync({
     content: {
       title: title,
